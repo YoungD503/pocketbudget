@@ -1,0 +1,526 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Pocket Budget</title>
+<meta name="description" content="Free personal finance app in English and Spanish. See your net worth, accounts, debts and monthly cash flow. Your data stays on your phone.">
+<meta name="theme-color" content="#0e6b55">
+<link rel="apple-touch-icon" href="app/icon-180.png">
+<meta property="og:title" content="Pocket Budget: your money, clear. Free.">
+<meta property="og:description" content="Net worth, accounts, debts and a 50/30/20 plan in one free app. English and Spanish.">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='112' fill='%230e6b55'/%3E%3Ccircle cx='256' cy='256' r='154' fill='none' stroke='%23fff' stroke-width='26'/%3E%3Ctext x='256' y='262' fill='%23fff' font-family='Arial' font-weight='700' font-size='205' text-anchor='middle' dominant-baseline='central'%3E$%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,500..800&display=swap">
+<style>
+[hidden]{display:none!important}
+
+/* Layout: editorial landing. Big type hero with a live-looking phone on the right, then alternating light bands; one deep-green band for the promise; email form appears twice (hero + closing). */
+:root{
+  --paper:#f1f4f2; --surface:#ffffff; --ink:#122019; --muted:#56685f; --line:#dbe4df; --sunk:#e7eeea;
+  --green:#0e6b55; --green-deep:#0a4a3b; --on-green:#ffffff; --mint:#dcefe7; --gold:#e0a21b; --coral:#d0542f; --blue:#2a6fd6; --plum:#8a44b8; --bad:#c2372d;
+  --f-display:"Bricolage Grotesque",ui-rounded,"Segoe UI",system-ui,sans-serif;
+  --f-body:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+  --shadow:0 1px 2px rgba(18,32,25,.05),0 18px 50px rgba(18,32,25,.10);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0b1210; --surface:#141d1a; --ink:#e4eeea; --muted:#9aaea6; --line:#24322d; --sunk:#1b2622;
+    --green:#3fbf98; --green-deep:#0f3a2f; --on-green:#06150f; --mint:#16322a; --bad:#ff8577;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 18px 50px rgba(0,0,0,.35); color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0b1210; --surface:#141d1a; --ink:#e4eeea; --muted:#9aaea6; --line:#24322d; --sunk:#1b2622;
+  --green:#3fbf98; --green-deep:#0f3a2f; --on-green:#06150f; --mint:#16322a; --bad:#ff8577;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 18px 50px rgba(0,0,0,.35); color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{background:var(--paper);color:var(--ink);font:17px/1.55 var(--f-body);-webkit-font-smoothing:antialiased;margin:0}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--paper)}
+a{color:inherit}
+button,input{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.pad{padding-left:max(18px,env(safe-area-inset-left,0px));padding-right:max(18px,env(safe-area-inset-right,0px))}
+.in{max-width:1120px;margin:0 auto}
+h1,h2,h3{font-family:var(--f-display);letter-spacing:-.025em;margin:0;text-wrap:balance}
+.num{font-variant-numeric:tabular-nums}
+.icon{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+
+/* Top bar */
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;background:color-mix(in srgb,var(--paper) 88%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid transparent;transition:border-color .2s}
+.bar.scrolled{border-bottom-color:var(--line)}
+.bar .in{display:flex;align-items:center;gap:14px;padding-block:12px}
+.logo{display:flex;align-items:center;gap:10px;font:800 20px/1 var(--f-display);text-decoration:none;letter-spacing:-.02em}
+.logo i{width:32px;height:32px;border-radius:10px;background:var(--green);color:var(--on-green);display:grid;place-items:center;font:800 18px/1 var(--f-display);font-style:normal}
+.nav{display:flex;gap:22px;margin-left:24px;font-size:15px}
+.nav a{text-decoration:none;color:var(--muted);font-weight:700}
+.nav a:hover{color:var(--ink)}
+.sp{flex:1}
+.lang{border:1px solid var(--line);background:var(--surface);border-radius:999px;height:40px;padding:0 13px;font-weight:700;font-size:14px;cursor:pointer}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:999px;padding:13px 22px;font-weight:700;background:var(--green);color:var(--on-green);text-decoration:none;cursor:pointer;white-space:nowrap}
+.btn.sm{padding:10px 16px;font-size:15px}
+.btn.ghost{background:var(--surface);color:var(--ink);border:1px solid var(--line)}
+@media (max-width:820px){.nav{display:none}}
+@media (max-width:420px){.bar .btn.sm{display:none}}
+
+/* Hero */
+.hero .in{display:grid;grid-template-columns:1.1fr .9fr;gap:48px;align-items:center;padding-block:56px 72px}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:14px;font-weight:700;color:var(--green);background:var(--mint);padding:7px 13px;border-radius:999px}
+.hero h1{font-size:clamp(44px,7vw,82px);line-height:.98;font-weight:800;margin:20px 0 18px}
+.hero h1 em{font-style:normal;color:var(--green);background:linear-gradient(transparent 62%,color-mix(in srgb,var(--gold) 45%,transparent) 62%)}
+.lead{font-size:clamp(18px,2.2vw,21px);color:var(--muted);max-width:34em;margin:0 0 26px}
+.trust{display:flex;gap:18px;flex-wrap:wrap;margin-top:18px;font-size:14px;color:var(--muted)}
+.trust span{display:inline-flex;align-items:center;gap:7px}
+.trust .icon{width:18px;height:18px;color:var(--green)}
+@media (max-width:900px){.hero .in{grid-template-columns:1fr;gap:40px;padding-block:36px 56px}}
+
+/* Form */
+.form{background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:8px;box-shadow:var(--shadow);max-width:540px}
+.form .row{display:flex;gap:8px}
+.form input[type=email]{flex:1;min-width:0;border:0;background:transparent;padding:14px 14px;font-size:17px;outline:none}
+.form .row:focus-within{box-shadow:0 0 0 2px var(--green);border-radius:16px}
+.consent{display:flex;flex-direction:column;gap:8px;padding:10px 12px 6px;font-size:14px;color:var(--muted)}
+.consent label{display:flex;gap:9px;align-items:flex-start;cursor:pointer}
+.consent input{width:18px;height:18px;margin-top:3px;accent-color:var(--green);flex:none}
+.consent a{color:var(--green);font-weight:700}
+.msg{font-size:14px;padding:0 12px 6px;min-height:0}
+.msg.err{color:var(--bad)}
+.done{display:none;padding:18px;text-align:left}
+.form.ok .row,.form.ok .consent,.form.ok .msg{display:none}
+.form.ok .done{display:block}
+.done b{display:block;font:800 22px/1.2 var(--f-display);margin-bottom:6px}
+.hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+@media (max-width:480px){.form .row{flex-direction:column}.form .btn{width:100%}}
+
+/* Phone */
+.phone{justify-self:center;width:min(360px,100%);aspect-ratio:9/18.5;max-width:100%;border-radius:46px;background:#0d1512;padding:12px;box-shadow:0 40px 80px rgba(10,40,30,.28),0 0 0 1px rgba(255,255,255,.06) inset;position:relative;transform:rotate(2deg)}
+.screen{height:100%;border-radius:36px;background:#f1f4f2;overflow:hidden;padding:18px 14px;color:#122019;font-size:12px;display:flex;flex-direction:column;gap:10px}
+.notch{position:absolute;top:20px;left:50%;transform:translateX(-50%);width:90px;height:22px;border-radius:20px;background:#0d1512}
+.scr-top{display:flex;justify-content:space-between;align-items:center;margin-top:18px}
+.scr-top b{font:800 15px/1 var(--f-display)}
+.scr-top span{font-size:11px;color:#56685f}
+.card{border-radius:20px;padding:14px;color:#fff;background:radial-gradient(circle at 110% -10%,rgba(255,255,255,.16) 0 18%,transparent 18.2%),radial-gradient(circle at 110% -10%,rgba(255,255,255,.08) 0 30%,transparent 30.2%),linear-gradient(155deg,#0c5c49,#063328)}
+.card small{opacity:.8;font-size:10px;letter-spacing:.08em;text-transform:uppercase;font-weight:700}
+.card .nw{font:800 30px/1.1 var(--f-display);letter-spacing:-.03em;margin:3px 0 6px}
+.card .chg{display:inline-block;font-size:10px;font-weight:700;background:rgba(255,255,255,.15);padding:3px 8px;border-radius:99px}
+.card .tri{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:10px}
+.card .tri div{background:rgba(255,255,255,.1);border-radius:10px;padding:6px 7px}
+.card .tri i{display:block;font-style:normal;font-size:9px;opacity:.8}
+.card .tri b{font:700 12px/1.2 var(--f-display)}
+.card svg{position:absolute}
+.mini{background:#fff;border-radius:16px;padding:11px;border:1px solid #dbe4df}
+.mini h4{margin:0 0 8px;font:700 12px/1 var(--f-display)}
+.bars{display:flex;align-items:flex-end;gap:7px;height:58px}
+.bars div{flex:1;display:flex;gap:2px;align-items:flex-end;height:100%}
+.bars i{flex:1;border-radius:3px;background:#1a8a68}
+.bars i+i{background:#9fc9b8}
+.acc{display:flex;align-items:center;gap:8px;padding:6px 0;border-top:1px solid #e7eeea}
+.acc:first-of-type{border-top:0}
+.acc .t{width:24px;height:24px;border-radius:8px;flex:none}
+.acc span{flex:1}
+.acc b{font-variant-numeric:tabular-nums}
+.plan{display:flex;height:8px;border-radius:99px;overflow:hidden;gap:2px;margin:6px 0}
+.float{position:absolute;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:16px;padding:10px 12px;font-size:13px;box-shadow:var(--shadow);display:flex;gap:9px;align-items:center;transform:rotate(-2deg)}
+.float b{display:block;font:800 16px/1.1 var(--f-display)}
+.float.f1{left:-46px;top:30%}
+.float.f2{right:-36px;bottom:16%}
+.float .dot{width:30px;height:30px;border-radius:10px;display:grid;place-items:center;flex:none}
+@media (max-width:520px){.float.f1{left:-8px}.float.f2{right:-6px}}
+
+/* Sections */
+section{padding-block:76px}
+.kicker{font-size:13px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--green)}
+.sh2{font-size:clamp(32px,4.6vw,52px);line-height:1.04;font-weight:800;margin:10px 0 14px;max-width:18em}
+.sub{color:var(--muted);font-size:19px;max-width:38em;margin:0}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:40px}
+.feat{background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:22px}
+.feat .ic{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;margin-bottom:16px;background:color-mix(in srgb,var(--c) 15%,var(--surface));color:color-mix(in srgb,var(--c) 80%,var(--ink))}
+.feat h3{font-size:21px;margin-bottom:6px}
+.feat p{margin:0;color:var(--muted);font-size:16px}
+@media (max-width:900px){.grid{grid-template-columns:1fr 1fr}}
+@media (max-width:600px){.grid{grid-template-columns:1fr}}
+.alt{background:var(--surface);border-block:1px solid var(--line)}
+.who{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:36px}
+.who article{border-radius:22px;padding:24px;background:var(--paper);border:1px solid var(--line)}
+.who h3{font-size:24px;margin:14px 0 8px}
+.who ul{margin:12px 0 0;padding-left:20px;color:var(--muted);font-size:16px}
+.who li{margin:4px 0}
+.who .badge{display:inline-flex;align-items:center;gap:8px;font-weight:700;font-size:14px;padding:6px 11px;border-radius:999px;background:color-mix(in srgb,var(--c) 14%,var(--surface));color:color-mix(in srgb,var(--c) 80%,var(--ink))}
+@media (max-width:900px){.who{grid-template-columns:1fr}}
+
+.rule{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center}
+.ruleviz{background:var(--surface);border:1px solid var(--line);border-radius:26px;padding:26px;box-shadow:var(--shadow)}
+.big3{display:flex;height:64px;border-radius:18px;overflow:hidden;gap:4px}
+.big3 div{display:flex;align-items:flex-end;padding:10px 12px;color:#fff;font:800 22px/1 var(--f-display)}
+.legend{display:grid;gap:14px;margin-top:22px}
+.legend div{display:flex;gap:12px;align-items:flex-start}
+.legend i{width:14px;height:14px;border-radius:4px;margin-top:5px;flex:none}
+.legend b{display:block}
+.legend span{color:var(--muted);font-size:15px}
+@media (max-width:900px){.rule{grid-template-columns:1fr;gap:30px}}
+
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:36px;counter-reset:st}
+.steps li{list-style:none;background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:24px;counter-increment:st}
+.steps li::before{content:counter(st);display:grid;place-items:center;width:40px;height:40px;border-radius:12px;background:var(--green);color:var(--on-green);font:800 20px/1 var(--f-display);margin-bottom:16px}
+.steps h3{font-size:21px;margin-bottom:6px}
+.steps p{margin:0;color:var(--muted);font-size:16px}
+.steps{padding:0}
+@media (max-width:900px){.steps{grid-template-columns:1fr}}
+
+.promise{background:var(--green-deep);color:#fff}
+.promise .sh2{color:#fff}
+.promise .sub{color:rgba(255,255,255,.82)}
+.promise .kicker{color:#9fe3c8}
+.pgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:36px}
+.pgrid div{border:1px solid rgba(255,255,255,.16);border-radius:20px;padding:20px;background:rgba(255,255,255,.05)}
+.pgrid b{display:flex;align-items:center;gap:10px;font:700 19px/1.3 var(--f-display);margin-bottom:6px}
+.pgrid p{margin:0;color:rgba(255,255,255,.8);font-size:16px}
+.pgrid .icon{color:#9fe3c8}
+@media (max-width:700px){.pgrid{grid-template-columns:1fr}}
+
+.faq{max-width:820px}
+.faq details{border-bottom:1px solid var(--line);padding:18px 0}
+.faq summary{cursor:pointer;font:700 19px/1.35 var(--f-display);list-style:none;display:flex;justify-content:space-between;gap:16px}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:"+";font-size:24px;line-height:1;color:var(--green)}
+.faq details[open] summary::after{content:"–"}
+.faq p{margin:10px 0 0;color:var(--muted)}
+
+.closing{text-align:center}
+.closing .form{margin:30px auto 0;text-align:left}
+.closing .sh2{margin-left:auto;margin-right:auto}
+.closing .sub{margin:0 auto}
+footer{padding-block:36px;border-top:1px solid var(--line);color:var(--muted);font-size:14px}
+footer .in{display:flex;gap:16px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+</style>
+
+</head>
+<body>
+<header class="bar pad" id="bar">
+  <div class="in">
+    <a class="logo" href="#top"><i aria-hidden="true">$</i>Pocket Budget</a>
+    <nav class="nav" aria-label="Sections">
+      <a href="#features" data-t="nav.features">Features</a>
+      <a href="#how" data-t="nav.how">How it works</a>
+      <a href="#privacy" data-t="nav.privacy">Privacy</a>
+      <a href="#faq" data-t="nav.faq">FAQ</a>
+    </nav>
+    <div class="sp"></div>
+    <button class="lang" id="langBtn" type="button">ES</button>
+    <a class="btn sm" href="#start" id="topCta" data-t="cta.top">Start free</a>
+  </div>
+</header>
+
+<main id="top">
+  <div class="hero pad">
+    <div class="in">
+      <div>
+        <span class="eyebrow" data-t="hero.eyebrow">Free · No ads · English &amp; Español</span>
+        <h1 data-t-html="hero.title">Your money, <em>clear</em>. For free.</h1>
+        <p class="lead" data-t="hero.lead">See what you own, what you owe and where every dollar goes. Pocket Budget brings your accounts, debts and monthly budget into one simple dashboard on your phone.</p>
+        <form class="form" id="start" novalidate></form>
+        <div class="trust">
+          <span><svg class="icon" viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/></svg><span data-t="trust.1">Data stays on your phone</span></span>
+          <span><svg class="icon" viewBox="0 0 24 24"><path d="M5 12l5 5 9-10"/></svg><span data-t="trust.2">No bank login needed</span></span>
+          <span><svg class="icon" viewBox="0 0 24 24"><path d="M5 12l5 5 9-10"/></svg><span data-t="trust.3">Works offline</span></span>
+        </div>
+      </div>
+
+      <div style="position:relative;justify-self:center;width:min(360px,100%)">
+        <div class="phone" aria-label="Preview of the Pocket Budget app" role="img">
+          <span class="notch"></span>
+          <div class="screen">
+            <div class="scr-top"><b data-t="ph.hi">Good evening, Ana</b><span data-t="ph.date">Mon, Oct 19</span></div>
+            <div class="card" style="position:relative">
+              <small data-t="ph.nw">Net worth</small>
+              <div class="nw num">$6,475</div>
+              <span class="chg" data-t="ph.chg">▲ $310 vs last month</span>
+              <svg viewBox="0 0 90 40" style="right:12px;top:16px;width:84px;height:38px" aria-hidden="true"><polyline points="0,32 18,28 36,30 54,20 72,16 90,8" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="90" cy="8" r="3.5" fill="#fff"/></svg>
+              <div class="tri"><div><i data-t="ph.own">You own</i><b class="num">$27.9k</b></div><div><i data-t="ph.owe">You owe</i><b class="num">$21.5k</b></div><div><i data-t="ph.cash">Cash &amp; bank</i><b class="num">$1,325</b></div></div>
+            </div>
+            <div class="mini">
+              <h4 data-t="ph.flow">Income vs. expenses</h4>
+              <div class="bars" aria-hidden="true">
+                <div><i style="height:78%"></i><i style="height:62%"></i></div><div><i style="height:80%"></i><i style="height:70%"></i></div><div><i style="height:76%"></i><i style="height:58%"></i></div>
+                <div><i style="height:84%"></i><i style="height:66%"></i></div><div><i style="height:82%"></i><i style="height:60%"></i></div><div><i style="height:88%"></i><i style="height:52%"></i></div>
+              </div>
+            </div>
+            <div class="mini">
+              <h4 data-t="ph.plan">Your 50/30/20 plan</h4>
+              <div class="plan" aria-hidden="true"><i style="flex:50;background:#2a6fd6"></i><i style="flex:30;background:#d0542f"></i><i style="flex:10;background:#1a8a68"></i><i style="flex:10;background:#8a44b8"></i></div>
+              <div class="acc"><span class="t" style="background:#e3ecfb"></span><span data-t="ph.needs">Needs</span><b>$1,690</b></div>
+              <div class="acc"><span class="t" style="background:#fae5de"></span><span data-t="ph.wants">Wants</span><b>$83</b></div>
+              <div class="acc"><span class="t" style="background:#dcefe7"></span><span data-t="ph.saved">Saved</span><b>$400</b></div>
+            </div>
+          </div>
+        </div>
+        <div class="float f1"><span class="dot" style="background:#fbe4e1;color:#c2372d"><svg class="icon" viewBox="0 0 24 24" style="width:18px;height:18px"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg></span><span><span data-t="fl.debt">Visa paid off</span><b data-t="fl.debtWhen">Sep 2031</b></span></span></div>
+        <div class="float f2"><span class="dot" style="background:#dcefe7;color:#0e6b55"><svg class="icon" viewBox="0 0 24 24" style="width:18px;height:18px"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg></span><span><span data-t="fl.rate">Savings rate</span><b>21%</b></span></div>
+      </div>
+    </div>
+  </div>
+
+  <section id="features" class="pad alt">
+    <div class="in">
+      <div class="kicker" data-t="f.kicker">Everything in one place</div>
+      <h2 class="sh2" data-t="f.title">The full picture of your money, not just a list of expenses.</h2>
+      <p class="sub" data-t="f.sub">Built for real life: paychecks every two weeks, cash tips, a credit card you are paying down and a side hustle on weekends.</p>
+      <div class="grid" id="feats"></div>
+    </div>
+  </section>
+
+  <section class="pad">
+    <div class="in">
+      <div class="kicker" data-t="w.kicker">Made for how you earn</div>
+      <h2 class="sh2" data-t="w.title">Employee, entrepreneur or side hustler. Or all three.</h2>
+      <div class="who" id="who"></div>
+    </div>
+  </section>
+
+  <section class="pad alt">
+    <div class="in rule">
+      <div>
+        <div class="kicker" data-t="r.kicker">A plan that works</div>
+        <h2 class="sh2" data-t="r.title">Start with the 50/30/20 rule. Make it yours anytime.</h2>
+        <p class="sub" data-t="r.sub">Tell us your take-home pay and we set a limit for every category. Prefer 70/20/10 or your own percentages? Change it in one tap.</p>
+      </div>
+      <div class="ruleviz">
+        <div class="big3" aria-hidden="true"><div style="flex:50;background:#2a6fd6">50%</div><div style="flex:30;background:#d0542f">30%</div><div style="flex:20;background:#1a8a68">20%</div></div>
+        <div class="legend">
+          <div><i style="background:#2a6fd6"></i><div><b data-t="r.needs">Needs</b><span data-t="r.needsD">Rent, groceries, bills, transport, minimum debt payments</span></div></div>
+          <div><i style="background:#d0542f"></i><div><b data-t="r.wants">Wants</b><span data-t="r.wantsD">Eating out, fun, shopping, subscriptions</span></div></div>
+          <div><i style="background:#1a8a68"></i><div><b data-t="r.save">Savings &amp; investing</b><span data-t="r.saveD">Emergency fund, retirement, growing your business</span></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="how" class="pad">
+    <div class="in">
+      <div class="kicker" data-t="h.kicker">How it works</div>
+      <h2 class="sh2" data-t="h.title">Ready in about a minute.</h2>
+      <ol class="steps">
+        <li><h3 data-t="h.1">Enter your email</h3><p data-t="h.1d">That’s your free access. No password, no bank login.</p></li>
+        <li><h3 data-t="h.2">Answer two questions</h3><p data-t="h.2d">How you earn and what you take home. Add what’s in the bank and what you owe if you like.</p></li>
+        <li><h3 data-t="h.3">See your dashboard</h3><p data-t="h.3d">Net worth, debts, monthly cash flow and your plan. Add it to your home screen like an app.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <section id="privacy" class="pad promise">
+    <div class="in">
+      <div class="kicker" data-t="p.kicker">Our promise</div>
+      <h2 class="sh2" data-t="p.title">Your finances stay on your phone. Period.</h2>
+      <p class="sub" data-t="p.sub">Pocket Budget has no account database. Balances, entries and receipts live in your own browser, on your own device.</p>
+      <div class="pgrid">
+        <div><b><svg class="icon" viewBox="0 0 24 24"><rect x="7" y="2" width="10" height="20" rx="2"/></svg><span data-t="p.1">Stored on your device</span></b><p data-t="p.1d">We never see your balances or purchases. Make a backup in Settings and restore it on a new phone.</p></div>
+        <div><b><svg class="icon" viewBox="0 0 24 24"><path d="M3 8V5a2 2 0 0 1 2-2h3M16 3h3a2 2 0 0 1 2 2v3M21 16v3a2 2 0 0 1-2 2h-3M8 21H5a2 2 0 0 1-2-2v-3"/></svg><span data-t="p.2">Receipts read on your phone</span></b><p data-t="p.2d">Receipt photos are scanned on the device and never uploaded.</p></div>
+        <div><b><svg class="icon" viewBox="0 0 24 24"><path d="M4 6h16v12H4z"/><path d="M4 7l8 6 8-6"/></svg><span data-t="p.3">Your email, used with care</span></b><p data-t="p.3d">We use it to give you access and, if you agree, to send tips and updates. We never sell it. Unsubscribe anytime.</p></div>
+        <div><b><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12h8"/></svg><span data-t="p.4">No ads, no tracking</span></b><p data-t="p.4d">No advertising and no tracking scripts. The app is free for everyone.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="faq" class="pad">
+    <div class="in faq">
+      <div class="kicker" data-t="q.kicker">Questions</div>
+      <h2 class="sh2" data-t="q.title">Good to know</h2>
+      <div id="faqs"></div>
+    </div>
+  </section>
+
+  <section class="pad alt closing">
+    <div class="in">
+      <h2 class="sh2" data-t="c.title">Know where you stand. Starting today.</h2>
+      <p class="sub" data-t="c.sub">Free, in English and Spanish, on any phone.</p>
+      <form class="form" id="start2" novalidate></form>
+    </div>
+  </section>
+</main>
+
+<footer class="pad">
+  <div class="in">
+    <span>© <span id="yr"></span> Pocket Budget · <span data-t="foot.free">Free for everyone</span></span>
+    <span><a href="#privacy" data-t="nav.privacy">Privacy</a> · <a href="#faq" data-t="nav.faq">FAQ</a></span>
+  </div>
+</footer>
+
+<script>
+(function () {
+'use strict';
+/* ====== Settings ======
+ * SIGNUP_URL: the address of your Google Apps Script web app (see backend/Code.gs and README).
+ * Leave it empty to try the page: emails are then only kept on the visitor's phone.
+ * APP_URL: where the app lives, relative to this page. */
+var SIGNUP_URL = '';
+var APP_URL = 'app/';
+var ACCESS_KEY = 'pocketBudget.access';
+
+var T = {
+en: {
+  'nav.features':'Features','nav.how':'How it works','nav.privacy':'Privacy','nav.faq':'FAQ','cta.top':'Start free','cta.open':'Open my app',
+  'hero.eyebrow':'Free · No ads · English & Español','hero.title':'Your money, <em>clear</em>. For free.',
+  'hero.lead':'See what you own, what you owe and where every dollar goes. Pocket Budget brings your accounts, debts and monthly budget into one simple dashboard on your phone.',
+  'trust.1':'Data stays on your phone','trust.2':'No bank login needed','trust.3':'Works offline',
+  'form.ph':'Your email','form.btn':'Get free access','form.terms':'I agree to the <a href="#privacy">privacy terms</a>.','form.news':'Send me money tips and app updates (optional).',
+  'form.badEmail':'Enter a valid email, like ana@gmail.com.','form.needTerms':'Please agree to the privacy terms to continue.','form.sending':'One moment…',
+  'form.okTitle':'You’re in!','form.okText':'Opening your app…','form.okPreview':'Your access is saved on this phone. On your published site, the app opens now.','form.welcomeBack':'Welcome back, {e}.','form.open':'Open my app',
+  'ph.hi':'Good evening, Ana','ph.date':'Mon, Oct 19','ph.nw':'Net worth','ph.chg':'▲ $310 vs last month','ph.own':'You own','ph.owe':'You owe','ph.cash':'Cash & bank','ph.flow':'Income vs. expenses','ph.plan':'Your 50/30/20 plan','ph.needs':'Needs','ph.wants':'Wants','ph.saved':'Saved',
+  'fl.debt':'Visa paid off','fl.debtWhen':'Sep 2031','fl.rate':'Savings rate',
+  'f.kicker':'Everything in one place','f.title':'The full picture of your money, not just a list of expenses.','f.sub':'Built for real life: paychecks every two weeks, cash tips, a credit card you are paying down and a side hustle on weekends.',
+  'f1':'Net worth','f1d':'What you own minus what you owe, and how it changes month to month.','f2':'Debts with an end date','f2d':'Cards and loans with interest, minimum payment and the month you’ll be debt-free.',
+  'f3':'Cash flow','f3d':'Income vs. expenses for the last six months, plus your savings rate.','f4':'Add in seconds','f4d':'A big keypad, category icons and accounts that update their own balance.',
+  'f5':'Scan receipts','f5d':'Snap a receipt and it reads the total, date and store for you.','f6':'Bills and paydays','f6d':'Rent, phone and paychecks every two weeks, recorded on their date.',
+  'w.kicker':'Made for how you earn','w.title':'Employee, entrepreneur or side hustler. Or all three.',
+  'w1':'Employee','w1a':'Paychecks weekly, every 2 weeks or monthly','w1b':'Bonus and overtime','w1c':'Savings rate and net worth',
+  'w2':'Entrepreneur','w2a':'Sales and client payments','w2b':'Inventory, marketing and tools','w2c':'Profit and a tax set-aside estimate',
+  'w3':'Side hustle','w3a':'Gig apps and tips','w3b':'Gas, phone and app fees','w3c':'Kept apart from your personal budget',
+  'r.kicker':'A plan that works','r.title':'Start with the 50/30/20 rule. Make it yours anytime.','r.sub':'Tell us your take-home pay and we set a limit for every category. Prefer 70/20/10 or your own percentages? Change it in one tap.',
+  'r.needs':'Needs','r.needsD':'Rent, groceries, bills, transport, minimum debt payments','r.wants':'Wants','r.wantsD':'Eating out, fun, shopping, subscriptions','r.save':'Savings & investing','r.saveD':'Emergency fund, retirement, growing your business',
+  'h.kicker':'How it works','h.title':'Ready in about a minute.','h.1':'Enter your email','h.1d':'That’s your free access. No password, no bank login.',
+  'h.2':'Answer two questions','h.2d':'How you earn and what you take home. Add what’s in the bank and what you owe if you like.','h.3':'See your dashboard','h.3d':'Net worth, debts, monthly cash flow and your plan. Add it to your home screen like an app.',
+  'p.kicker':'Our promise','p.title':'Your finances stay on your phone. Period.','p.sub':'Pocket Budget has no account database. Balances, entries and receipts live in your own browser, on your own device.',
+  'p.1':'Stored on your device','p.1d':'We never see your balances or purchases. Make a backup in Settings and restore it on a new phone.',
+  'p.2':'Receipts read on your phone','p.2d':'Receipt photos are scanned on the device and never uploaded.',
+  'p.3':'Your email, used with care','p.3d':'We use it to give you access and, if you agree, to send tips and updates. We never sell it. Unsubscribe anytime.',
+  'p.4':'No ads, no tracking','p.4d':'No advertising and no tracking scripts. The app is free for everyone.',
+  'q.kicker':'Questions','q.title':'Good to know',
+  'q1':'Is it really free?','q1a':'Yes. No trial, no premium tier, no ads. It runs on your phone, so it costs almost nothing to keep it free for everyone.',
+  'q2':'Do I need to connect my bank?','q2a':'No. You type your balances once and log what you spend. Many people prefer it: nothing to hack, and you stay aware of every purchase.',
+  'q3':'What if I change phones?','q3a':'Go to Settings → Backup, copy or download your backup, and restore it on the new phone.',
+  'q4':'Does it work in Spanish?','q4a':'Yes. Everything is in English and Spanish, including categories, dates and money formats. Switch anytime.',
+  'q5':'How do I install it?','q5a':'Open it on your phone and choose “Add to Home Screen” (iPhone) or “Install app” (Android). It opens like an app and works offline.',
+  'c.title':'Know where you stand. Starting today.','c.sub':'Free, in English and Spanish, on any phone.','foot.free':'Free for everyone'
+},
+es: {
+  'nav.features':'Funciones','nav.how':'Cómo funciona','nav.privacy':'Privacidad','nav.faq':'Preguntas','cta.top':'Empieza gratis','cta.open':'Abrir mi app',
+  'hero.eyebrow':'Gratis · Sin anuncios · Español e inglés','hero.title':'Tu dinero, <em>claro</em>. Gratis.',
+  'hero.lead':'Mira lo que tienes, lo que debes y a dónde se va cada peso. Pocket Budget reúne tus cuentas, deudas y presupuesto del mes en un panel sencillo en tu teléfono.',
+  'trust.1':'Tus datos se quedan en tu teléfono','trust.2':'Sin conectar tu banco','trust.3':'Funciona sin internet',
+  'form.ph':'Tu correo','form.btn':'Obtener acceso gratis','form.terms':'Acepto los <a href="#privacy">términos de privacidad</a>.','form.news':'Envíame consejos de dinero y novedades (opcional).',
+  'form.badEmail':'Escribe un correo válido, como ana@gmail.com.','form.needTerms':'Acepta los términos de privacidad para continuar.','form.sending':'Un momento…',
+  'form.okTitle':'¡Ya estás dentro!','form.okText':'Abriendo tu app…','form.okPreview':'Tu acceso quedó guardado en este teléfono. En tu sitio publicado, la app se abre ahora.','form.welcomeBack':'Bienvenido de nuevo, {e}.','form.open':'Abrir mi app',
+  'ph.hi':'Buenas noches, Ana','ph.date':'Lun, 19 oct','ph.nw':'Patrimonio neto','ph.chg':'▲ $310 vs mes pasado','ph.own':'Tienes','ph.owe':'Debes','ph.cash':'Efectivo y banco','ph.flow':'Ingresos vs. gastos','ph.plan':'Tu plan 50/30/20','ph.needs':'Necesidades','ph.wants':'Gustos','ph.saved':'Ahorrado',
+  'fl.debt':'Visa liquidada','fl.debtWhen':'Sep 2031','fl.rate':'Tasa de ahorro',
+  'f.kicker':'Todo en un lugar','f.title':'El panorama completo de tu dinero, no solo una lista de gastos.','f.sub':'Hecha para la vida real: quincenas, propinas en efectivo, una tarjeta que estás pagando y un trabajo extra los fines de semana.',
+  'f1':'Patrimonio neto','f1d':'Lo que tienes menos lo que debes, y cómo cambia mes a mes.','f2':'Deudas con fecha final','f2d':'Tarjetas y préstamos con interés, pago mínimo y el mes en que quedarás libre.',
+  'f3':'Flujo de dinero','f3d':'Ingresos vs. gastos de los últimos seis meses y tu tasa de ahorro.','f4':'Anota en segundos','f4d':'Teclado grande, íconos por categoría y cuentas que actualizan su saldo solas.',
+  'f5':'Escanea recibos','f5d':'Toma una foto del recibo y lee el total, la fecha y la tienda.','f6':'Pagos y quincenas','f6d':'Renta, teléfono y tu pago cada dos semanas, registrados en su fecha.',
+  'w.kicker':'Hecha para cómo ganas','w.title':'Empleado, emprendedor o con trabajo extra. O las tres.',
+  'w1':'Empleado','w1a':'Pago semanal, quincenal o mensual','w1b':'Bonos y horas extra','w1c':'Tasa de ahorro y patrimonio',
+  'w2':'Emprendedor','w2a':'Ventas y pagos de clientes','w2b':'Inventario, publicidad y herramientas','w2c':'Ganancia y apartado para impuestos',
+  'w3':'Trabajo extra','w3a':'Apps de trabajo y propinas','w3b':'Gasolina, teléfono y comisiones','w3c':'Separado de tu presupuesto personal',
+  'r.kicker':'Un plan que funciona','r.title':'Empieza con la regla 50/30/20. Ajústala cuando quieras.','r.sub':'Dinos cuánto recibes y asignamos un límite a cada categoría. ¿Prefieres 70/20/10 o tus propios porcentajes? Cámbialo con un toque.',
+  'r.needs':'Necesidades','r.needsD':'Renta, comida, servicios, transporte, pagos mínimos de deudas','r.wants':'Gustos','r.wantsD':'Comer fuera, diversión, compras, suscripciones','r.save':'Ahorro e inversión','r.saveD':'Fondo de emergencia, retiro, hacer crecer tu negocio',
+  'h.kicker':'Cómo funciona','h.title':'Lista en un minuto.','h.1':'Escribe tu correo','h.1d':'Ese es tu acceso gratis. Sin contraseña y sin conectar tu banco.',
+  'h.2':'Responde dos preguntas','h.2d':'Cómo ganas y cuánto recibes. Si quieres, agrega lo que tienes en el banco y lo que debes.','h.3':'Mira tu panel','h.3d':'Patrimonio, deudas, flujo del mes y tu plan. Agrégala a tu pantalla de inicio como una app.',
+  'p.kicker':'Nuestra promesa','p.title':'Tus finanzas se quedan en tu teléfono. Punto.','p.sub':'Pocket Budget no tiene base de datos de cuentas. Tus saldos, movimientos y recibos viven en tu navegador, en tu dispositivo.',
+  'p.1':'Guardado en tu dispositivo','p.1d':'Nunca vemos tus saldos ni tus compras. Haz un respaldo en Ajustes y restáuralo en un teléfono nuevo.',
+  'p.2':'Recibos leídos en tu teléfono','p.2d':'Las fotos de recibos se leen en el dispositivo y nunca se suben.',
+  'p.3':'Tu correo, con cuidado','p.3d':'Lo usamos para darte acceso y, si aceptas, enviarte consejos y novedades. Nunca lo vendemos. Puedes darte de baja cuando quieras.',
+  'p.4':'Sin anuncios ni rastreo','p.4d':'Sin publicidad ni scripts de rastreo. La app es gratis para todos.',
+  'q.kicker':'Preguntas','q.title':'Lo que debes saber',
+  'q1':'¿De verdad es gratis?','q1a':'Sí. Sin prueba, sin versión premium y sin anuncios. Funciona en tu teléfono, así que mantenerla gratis para todos cuesta casi nada.',
+  'q2':'¿Tengo que conectar mi banco?','q2a':'No. Escribes tus saldos una vez y anotas lo que gastas. Mucha gente lo prefiere: no hay nada que hackear y estás al tanto de cada compra.',
+  'q3':'¿Y si cambio de teléfono?','q3a':'Ve a Ajustes → Respaldo, copia o descarga tu respaldo y restáuralo en el teléfono nuevo.',
+  'q4':'¿Funciona en español?','q4a':'Sí. Todo está en español e inglés, incluidas categorías, fechas y formatos de dinero. Cambia cuando quieras.',
+  'q5':'¿Cómo la instalo?','q5a':'Ábrela en tu teléfono y elige “Agregar a inicio” (iPhone) o “Instalar app” (Android). Se abre como una app y funciona sin internet.',
+  'c.title':'Sabe dónde estás parado. Desde hoy.','c.sub':'Gratis, en español e inglés, en cualquier teléfono.','foot.free':'Gratis para todos'
+}};
+var IC = {
+  trend:'<path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/>', card:'<rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M6 15h4"/>',
+  chart:'<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>', keypad:'<rect x="4" y="3" width="16" height="18" rx="3"/><path d="M8 8h.01M12 8h.01M16 8h.01M8 12h.01M12 12h.01M16 12h.01M8 16h8"/>',
+  scan:'<path d="M3 8V5a2 2 0 0 1 2-2h3M16 3h3a2 2 0 0 1 2 2v3M21 16v3a2 2 0 0 1-2 2h-3M8 21H5a2 2 0 0 1-2-2v-3M7 12h10"/>', cal:'<rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/>',
+  brief:'<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M3 13h18"/>', bike:'<circle cx="6" cy="17" r="3.5"/><circle cx="18" cy="17" r="3.5"/><path d="M6 17l4-8h5l3 8M10 9 8 5H6M15 9l-2 8"/>'
+};
+function ico(n) { return '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true">' + IC[n] + '</svg>'; }
+function detectLang() { try { var p = localStorage.getItem('pocketBudget.prefLang'); if (p === 'es' || p === 'en') return p; } catch (e) { /* ignore */ } return (navigator.language || 'en').toLowerCase().indexOf('es') === 0 ? 'es' : 'en'; }
+var LANG = detectLang();
+function t(k, v) { var s = T[LANG][k] || T.en[k] || k; if (v) Object.keys(v).forEach(function (x) { s = s.split('{' + x + '}').join(v[x]); }); return s; }
+function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+function access() { try { return JSON.parse(localStorage.getItem(ACCESS_KEY) || 'null'); } catch (e) { return null; } }
+
+function formHtml(id) {
+  var a = access();
+  if (a && a.email) return '<div class="done" style="display:block"><b>' + esc(t('form.welcomeBack', { e: a.email })) + '</b><a class="btn" href="' + APP_URL + '">' + esc(t('form.open')) + '</a></div>';
+  return '<div class="hp" aria-hidden="true"><label>Website<input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>' +
+    '<div class="row"><label class="hp" for="' + id + 'E">' + esc(t('form.ph')) + '</label><input type="email" id="' + id + 'E" name="email" autocomplete="email" inputmode="email" placeholder="' + esc(t('form.ph')) + '" required>' +
+    '<button class="btn" type="submit">' + esc(t('form.btn')) + '</button></div>' +
+    '<div class="consent"><label><input type="checkbox" name="terms" id="' + id + 'T"><span>' + t('form.terms') + '</span></label>' +
+    '<label><input type="checkbox" name="news" id="' + id + 'N" checked><span>' + esc(t('form.news')) + '</span></label></div>' +
+    '<div class="msg" role="alert" aria-live="polite"></div>' +
+    '<div class="done"><b>' + esc(t('form.okTitle')) + '</b><span class="donetext">' + esc(t('form.okText')) + '</span><div style="margin-top:14px"><a class="btn" href="' + APP_URL + '">' + esc(t('form.open')) + '</a></div></div>';
+}
+function render() {
+  document.documentElement.lang = LANG;
+  $('langBtn').textContent = LANG === 'es' ? 'EN' : 'ES';
+  $('langBtn').setAttribute('aria-label', LANG === 'es' ? 'Switch to English' : 'Cambiar a español');
+  document.querySelectorAll('[data-t]').forEach(function (el) { el.textContent = t(el.getAttribute('data-t')); });
+  document.querySelectorAll('[data-t-html]').forEach(function (el) { el.innerHTML = t(el.getAttribute('data-t-html')); });
+  var a = access();
+  $('topCta').textContent = a && a.email ? t('cta.open') : t('cta.top');
+  $('topCta').setAttribute('href', a && a.email ? APP_URL : '#start');
+  $('feats').innerHTML = [['trend', '#1a8a68', 1], ['card', '#c2372d', 2], ['chart', '#2a6fd6', 3], ['keypad', '#b07a06', 4], ['scan', '#8a44b8', 5], ['cal', '#0a8da6', 6]]
+    .map(function (f) { return '<article class="feat" style="--c:' + f[1] + '"><div class="ic">' + ico(f[0]) + '</div><h3>' + esc(t('f' + f[2])) + '</h3><p>' + esc(t('f' + f[2] + 'd')) + '</p></article>'; }).join('');
+  $('who').innerHTML = [['brief', '#2a6fd6', 1], ['trend', '#1a8a68', 2], ['bike', '#d0542f', 3]]
+    .map(function (w) { return '<article style="--c:' + w[1] + '"><span class="badge">' + ico(w[0]) + esc(t('w' + w[2])) + '</span><ul><li>' + esc(t('w' + w[2] + 'a')) + '</li><li>' + esc(t('w' + w[2] + 'b')) + '</li><li>' + esc(t('w' + w[2] + 'c')) + '</li></ul></article>'; }).join('');
+  $('faqs').innerHTML = [1, 2, 3, 4, 5].map(function (i) { return '<details><summary>' + esc(t('q' + i)) + '</summary><p>' + esc(t('q' + i + 'a')) + '</p></details>'; }).join('');
+  ['start', 'start2'].forEach(function (id) { $(id).innerHTML = formHtml(id); $(id).classList.remove('ok'); });
+}
+function $(id) { return document.getElementById(id); }
+
+/* ====== Sign-up ====== */
+function onSubmit(e) {
+  e.preventDefault();
+  var form = e.target, msg = form.querySelector('.msg'), btn = form.querySelector('button[type=submit]');
+  if (!msg || !btn) return;
+  var f = function (n) { return form.querySelector('[name="' + n + '"]'); };
+  var email = String(f('email').value || '').trim().toLowerCase();
+  msg.className = 'msg'; msg.textContent = '';
+  if (f('website') && f('website').value) return;                          // bots fill hidden fields
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) { msg.className = 'msg err'; msg.textContent = t('form.badEmail'); f('email').focus(); return; }
+  if (!f('terms').checked) { msg.className = 'msg err'; msg.textContent = t('form.needTerms'); return; }
+  btn.disabled = true; btn.textContent = t('form.sending');
+  var rec = { email: email, lang: LANG, news: !!f('news').checked, at: new Date().toISOString(), source: location.hostname || 'local' };
+  try { localStorage.setItem(ACCESS_KEY, JSON.stringify(rec)); localStorage.setItem('pocketBudget.prefLang', LANG); } catch (x) { /* private mode: still let them in */ }
+  send(rec).then(finish, finish);
+  function finish() {
+    form.classList.add('ok');
+    var inPreview = /claude|anthropic/.test(location.hostname);
+    if (inPreview) { form.querySelector('.donetext').textContent = t('form.okPreview'); return; }
+    setTimeout(function () { location.href = APP_URL; }, 900);
+  }
+}
+/** Sends the sign-up to your Google Sheet. Uses a simple request that Apps Script accepts from any site. */
+function send(rec) {
+  if (!SIGNUP_URL) return Promise.resolve();
+  var body = JSON.stringify(rec);
+  return Promise.race([
+    fetch(SIGNUP_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: body }),
+    new Promise(function (r) { setTimeout(r, 4000); })   // never keep someone waiting on a slow network
+  ]).catch(function () {
+    try { var q = JSON.parse(localStorage.getItem('pocketBudget.pendingSignup') || '[]'); q.push(rec); localStorage.setItem('pocketBudget.pendingSignup', JSON.stringify(q)); } catch (x) { /* ignore */ }
+  });
+}
+// Retry any sign-up that failed while offline.
+(function retry() {
+  if (!SIGNUP_URL) return;
+  try { var q = JSON.parse(localStorage.getItem('pocketBudget.pendingSignup') || '[]'); if (!q.length) return; localStorage.removeItem('pocketBudget.pendingSignup'); q.forEach(send); } catch (e) { /* ignore */ }
+})();
+
+document.addEventListener('submit', onSubmit);
+$('langBtn').addEventListener('click', function () { LANG = LANG === 'es' ? 'en' : 'es'; try { localStorage.setItem('pocketBudget.prefLang', LANG); } catch (e) { /* ignore */ } render(); });
+window.addEventListener('scroll', function () { $('bar').classList.toggle('scrolled', window.scrollY > 8); }, { passive: true });
+$('yr').textContent = new Date().getFullYear();
+render();
+// Someone sent here from the app without access: put the cursor in the email box.
+if (/[?&]gate=1/.test(location.search)) { var f = $('startE'); if (f) setTimeout(function () { f.focus(); }, 300); }
+})();
+</script>
+
+</body>
+</html>
